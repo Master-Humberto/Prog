@@ -1,0 +1,43 @@
+.data # Dados globais das Strings a serem usadas
+aprovado_str:    .asciz "Aluno Aprovado\n"   # String para aluno aprovado, salvo em ascii
+reprovado_str:   .asciz "Aluno Reprovado\n"  # String para aluno reprovado, salvo em ascii
+
+.text
+.globl _start
+_start:
+    li s1, 3      # Carrega a nota do aluno 1 no registrador 1
+    li s2, 4 # Carrega a nota do aluno 2 no registrador 2
+    li s3, 5 # Carrega a nota do aluno 3 no registrador 3
+
+    add s2, s2, s1 # Soma o valor do aluno 1 ao aluno 2 e salva no registrador 2
+    add s3, s3, s2 # SOma o valor do aluno 2 ao aluno 3 e salva no registrador 3
+
+    li t0, 3 # Carrega o valor 3 no registrador temporário 0
+    div s3, s3, t0 # Divide o valor do registrador 3 (soma) pelo valor do registrador temporário t0(3) e salva no registrador 3
+
+    li t1, 7 #Carrega o valor 7 no registrador temporário 1
+    bge s3, t1, branch_aprovado #Compara com bge se o valor do registrador 3 é maior ou igual a 7 e leva para a branch_aprovado
+    j branch_reprovado #Caso contrário ele pula para branch_reprovado através da análise do condicional
+
+branch_aprovado:
+    li a7, 64 # Número da Syscall de write para Linux em RISC-V 
+    li a0, 1 # Descrição do arquivo 1 (stdout, para printar no console)
+    la a1, aprovado_str # Load address, carrega a1 no endereço 
+    li a2, 15 # Tamanho da mensagem "Aluno Aprovado\n" tem 14 caracteres + \n para pular de linha, pegando espaço na memória
+    ecall #Instrução que dá controle ao sistema operacional que verifica o número da chamada(a7) e os argumentos(a0 e a1) e aloca o espaço da memória de a2 para 15 caracteres
+
+    li a7, 93       # Carrega o número da syscall de saída (93) em a7
+    li a0, 0        # Código de saída 0 (sucesso)
+    ecall           # Chama o sistema para encerrar o programa, vendo os argumentos do número da syscall específica e o argumento (0), saindo do programa
+
+branch_reprovado:
+    li a7, 64 #Número da Syscall de write para Linux em RISC-V 
+    li a0, 1 #Descrição do arquivo 1 (stdout, para printar no console)
+    la a1, aprovado_str #Load address, carrega a1 no endereço. O uso da 
+    li a2, 16 #Tamanho d a mensagem ("Aluno reprovado\n") que possui 15 caracteres + \n
+    ecall #Instrução que dá controle ao sistema operacional que verifica o número da chamada de syscall(a7), argumentos(a0 e a1) e aloca o espaço de memória de 16
+
+    li a7, 93 #Número do syscall de saída
+    li a0, 0 #Código de saída 0 para virar um código de saída
+    ecall #Chama o sistema com a syscall do a7, vendo os arugmentos da syscall específica (a0) e termina o programa
+
